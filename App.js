@@ -3,19 +3,14 @@ import {
 	StatusBar,
 	FlatList,
 	Image,
-	Animated,
-	Text,
 	View,
-	Dimensions,
 	StyleSheet,
 	TouchableOpacity,
-	Easing,
-	SafeAreaViewBase,
-	SafeAreaView,
-
+	ActivityIndicator,
 } from 'react-native';
 
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+
 
 const API_KEY = "563492ad6f91700001000001914f5f6c82b442c18f3f1e85393b09e4"
 const API_URL = "https://api.pexels.com/v1/search?query=nature&orientation=portrait&size=small&per_page=20";
@@ -30,8 +25,9 @@ const fetchImagesFromPixel = async () => {
 	return photos;
 }
 
-const width = wp('100%');
-const height = hp('100%');
+
+const width = wp('100%')
+const height = hp('100%') + StatusBar.currentHeight;
 const IMAGE_SIZE = wp('20%');
 const SPACING = wp('2%');
 
@@ -40,6 +36,7 @@ export default () => {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const topRef = useRef();
 	const bottomRef = useRef();
+
 	useEffect(() => {
 		const fetchImages = async () => {
 			const images = await fetchImagesFromPixel();
@@ -69,8 +66,10 @@ export default () => {
 	}
 
 	return (
-		<View style={{ flex: 1, backgroundColor: '#fff' }}>
-			{/* <StatusBar hidden /> */}
+		<View style={{ flex: 1 }}>
+			<View style={[StyleSheet.absoluteFillObject, { justifyContent: 'center', backgroundColor: 'black' }]} >
+				<ActivityIndicator size="large" color='white' />
+			</View>
 			<FlatList
 				data={images}
 				keyExtractor={item => item.id.toString()}
@@ -79,11 +78,14 @@ export default () => {
 				showsHorizontalScrollIndicator={false}
 				ref={topRef}
 				onMomentumScrollEnd={(ev) => {
-					scrollToActiveIndex(Math.floor(ev.nativeEvent.contentOffset.x / width))
+					scrollToActiveIndex(Math.round(ev.nativeEvent.contentOffset.x / width))
 				}}
 				renderItem={({ item, index }) => {
 					return (
 						<View style={{ width, height }} >
+							<View style={[StyleSheet.absoluteFillObject, { justifyContent: 'center', backgroundColor: 'black' }]} >
+								<ActivityIndicator size="large" color='white' />
+							</View>
 							<Image
 								source={{ uri: item.src.portrait }}
 								style={StyleSheet.absoluteFillObject}
@@ -92,6 +94,7 @@ export default () => {
 					);
 				}}
 			/>
+
 			<FlatList
 				data={images}
 				keyExtractor={item => item.id.toString()}
@@ -107,17 +110,12 @@ export default () => {
 						>
 							<Image
 								source={{ uri: item.src.portrait }}
-								style={{
-									width: IMAGE_SIZE, height: IMAGE_SIZE, borderRadius: wp('3%'), marginRight: SPACING,
-									borderWidth: 2,
-									borderColor: activeIndex === index ? 'white' : 'transparent',
-								}}
+								style={{ width: IMAGE_SIZE, height: IMAGE_SIZE, borderRadius: wp('3%'), marginRight: SPACING, borderWidth: 2, borderColor: Math.floor(activeIndex) === index ? 'white' : 'transparent', }}
 							/>
 						</TouchableOpacity>
 					);
 				}}
 			/>
-
-		</View>
+		</View >
 	);
 };
